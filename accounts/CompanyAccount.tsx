@@ -36,7 +36,6 @@ const CompanyAccountScreen = () => {
     useEffect(() => {
         if (session?.user?.id) {
             const fetchCompanyInfo = async () => {
-                console.log('Fetching company info for user ID:', session.user.id);
                 setLoading(true);
                 try {
                     const { data, error } = await supabase
@@ -49,7 +48,6 @@ const CompanyAccountScreen = () => {
                         console.error('Error fetching company info:', error);
                         Alert.alert('Error', 'Failed to fetch account information.');
                     } else if (data) {
-                        console.log('Fetched data:', data);
                         setCompanyName(data.company_name || '');
                         setWebsite(data.website || '');
                         setContactPhone(data.contact_phone || null);

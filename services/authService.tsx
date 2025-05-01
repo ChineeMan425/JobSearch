@@ -1,40 +1,5 @@
-// ./services/authService.ts
 import { supabase } from '../supabase';
-import { AuthResponse, AuthError, Session } from '@supabase/supabase-js';
-import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamList } from '../types/navigation'; // Adjust path
-
-// Define a type for your navigation object
-type AuthNavigation = StackNavigationProp<RootStackParamList>;
-
-let navigation: AuthNavigation | null = null;
-
-// Function to set the navigation object from your component
-export const setAuthNavigation = (nav: AuthNavigation) => {
-    navigation = nav;
-};
-
-// Function to check initial session
-export const checkInitialSession = async (): Promise<Session | null> => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session && navigation) {
-        navigation.navigate('Auth'); // Navigate to your login screen
-    }
-    return session;
-};
-
-// Function to handle auth state changes
-export const onAuthStateChangeHandler = (
-    callback: (_event: any, session: Session | null) => void
-): { data: { subscription: { unsubscribe: () => void } } } => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        callback(_event, session);
-        if (!session && navigation) {
-            navigation.navigate('Auth'); // Navigate to your login screen
-        }
-    });
-    return { data: { subscription } };
-};
+import { AuthResponse, AuthError } from '@supabase/supabase-js';
 
 interface SignUpResult {
     data?: AuthResponse['data']['user'] | null;
@@ -43,7 +8,6 @@ interface SignUpResult {
 
 interface SignInResult {
     error?: AuthError | null;
-    data?: AuthResponse['data']['session'] | null; // Include session data (important for the fix)
 }
 
 interface SignOutResult {
@@ -115,17 +79,14 @@ export const signUp = async (
 };
 
 export const signIn = async (email: string, password: string): Promise<SignInResult> => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
     });
-    return { error, data }; // Return both error and data (important for the fix)
+    return { error };
 };
 
 export const signOut = async (): Promise<SignOutResult> => {
     const { error } = await supabase.auth.signOut();
-    if (!error && navigation) {
-        navigation.navigate('Auth');
-    }
     return { error };
 };
